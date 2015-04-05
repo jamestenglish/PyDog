@@ -4,36 +4,44 @@ from db import db
 import sys
 from twisted.internet import reactor
 from scrapy.crawler import Crawler
-from scrapy import log, signals
-from scraper.adopt_a_pet_scraper import AdoptAPetSpider
-from scraper.pet_finder import PetFinderSpider
+from scrapy import log, project, signals
+from scrapers.adopt_a_pet_scraper import AdoptAPetSpider
+from scrapers.pet_finder_api import PetFinderApi
 from scrapy.utils.project import get_project_settings
-from Queue import Queue
+from pprint import pprint
+import settings
+
+from billiard import Process
+from billiard.queues import JoinableQueue
 
 
-def setup_adopt_a_pet(zip_code, results_queue):
-    spider = AdoptAPetSpider(zip_code=zip_code, results=results_queue)
-    settings = get_project_settings()
-    crawler = Crawler(settings)
-    crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
-    crawler.configure()
-    crawler.crawl(spider)
-    crawler.start()
+def remove_ids(ids_to_remove):
+    for mongo_id in ids_to_remove:
+        db.dogs.remove({'_id': mongo_id})
 
 
-def setup_pet_finder(zip_code, results_queue):
-    spider = PetFinderSpider(zip_code=zip_code, results=results_queue)
-    settings = get_project_settings()
-    crawler = Crawler(settings)
-    crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
-    crawler.configure()
-    crawler.crawl(spider)
-    crawler.start()
+def add_items(items_to_add):
+    for item in items_to_add:
+        db.dogs.insert(dict(item))
+
 
 @job(queue=q)
 def scrape(job_id):
     try:
-        _scrape()
+        zip_code = settings.ZIP_CODE
+        scrape_results = _scrape(zip_code)
+        scrape_results = collapse_duplicates(scrape_results)
+        db_dogs = list(db.dogs.find_all({}))
+
+        ids_to_remove = get_ids_to_remove(scrape_results, db_dogs)
+        items_to_add = get_items_to_add(scrape_results, db_dogs)
+
+        remove_ids(ids_to_remove)
+        add_items(items_to_add)
+
+        update = {'$set': {'done': True,
+                           'percent': 100}}
+        db.find_one_and_update({'job_id', job_id}, update)
 
     except:  # if ANYTHING goes wrong with the job we want to update the job db
         error_str = sys.exc_info()[0]
@@ -43,22 +51,116 @@ def scrape(job_id):
             'error': error_str
         }}
         db.find_one_and_update({'job_id', job_id}, update)
-    pass
 
 
-def _scrape():
-    results_queue = Queue()
-    zip_code = 67218
+class UrlCrawlerScript(Process):
+        def __init__(self, spider, result_queue):
+            Process.__init__(self)
+            settings = get_project_settings()
+            self.crawler = Crawler(settings)
+            self.result_queue = result_queue
 
-    setup_adopt_a_pet(zip_code, results_queue)
-    setup_pet_finder(zip_code, results_queue)
+            if not hasattr(project, 'crawler'):
+                self.crawler.install()
+                self.crawler.configure()
+                self.crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
+                self.crawler.signals.connect(self._item, signal=signals.item_scraped)
 
-    log.start()
-    reactor.run()  # the script will block here until the spider_closed signal was sent
+            self.spider = spider
+
+        def _item(self, item, response, spider):
+            print("ITEM!!")
+            pprint(item)
+            self.result_queue.put(item)
+
+        def run(self):
+            self.crawler.crawl(self.spider)
+            self.crawler.start()
+            reactor.run()
+
+
+def _scrape(zip_code):
+    results = _scrape_spider(AdoptAPetSpider(zip_code))
+    pet_finder_api = PetFinderApi(zip_code)
+    results.extend(pet_finder_api.find_dog_items())
+
+    return results
+
+
+def _scrape_spider(spider):
+    results_queue = JoinableQueue()
+    crawler = UrlCrawlerScript(spider, results_queue)
+    crawler.start()
+    crawler.join()
 
     results = []
 
     while not results_queue.empty():
-        results.append(results_queue.get())
+        item = results_queue.get()
+        results_queue.task_done()
+        results.append(item)
 
     return results
+
+
+def get_ids_to_remove(results, db_results):
+    results_hash = create_duplicates_hash(results)
+    db_hash = create_duplicates_hash(db_results)
+
+    results_key_set = set(results_hash.keys())
+    db_key_set = set(db_hash.keys())
+
+    difference = db_key_set.difference(results_key_set)
+
+    ids_to_remove = []
+    for key in difference:
+        ids_to_remove.append(db_hash[key][0]['_id'])
+
+    return ids_to_remove
+
+
+def get_items_to_add(results, db_results):
+    results_hash = create_duplicates_hash(results)
+    db_hash = create_duplicates_hash(db_results)
+
+    results_key_set = set(results_hash.keys())
+    db_key_set = set(db_hash.keys())
+
+    difference = results_key_set.difference(db_key_set)
+
+    items_to_add = []
+    for key in difference:
+        items_to_add.extend(results_hash[key])
+
+    return items_to_add
+
+
+def collapse_duplicates(results):
+    duplicates_hash = create_duplicates_hash(results)
+
+    collapsed = []
+    for key, items in duplicates_hash.iteritems():
+        if len(items) == 1:
+            collapsed.extend(items)
+        else:
+            urls = []
+            for item in items:
+                urls.extend(item['url'])
+
+            item = items[0]
+            item['url'] = urls
+            collapsed.append(item)
+
+    return collapsed
+
+
+def create_duplicates_hash(results):
+    duplicates_hash = {}
+    for item in results:
+        key = "{}|{}".format(item['name'], item['agency'])
+        if key not in duplicates_hash:
+            duplicates_hash[key] = []
+
+        duplicates_hash[key].append(item)
+
+    return duplicates_hash

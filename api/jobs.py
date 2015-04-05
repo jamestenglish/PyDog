@@ -4,7 +4,7 @@ from uuid import uuid4
 from jobs.scrape import scrape
 
 
-class DogScrap(restful.Resource):
+class DogScrape(restful.Resource):
     def post(self):
         job_id = uuid4()
         job = {'type': 'DogScrape',

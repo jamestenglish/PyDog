@@ -1,65 +1,56 @@
-#http://www.adoptapet.com/dog-adoption/search/75/miles/67218?sex=f&age=puppy
-#https://www.petfinder.com/pet-search?location=67218&animal=dog&primary_breed=&age=baby&age=young&gender=female
-
-
-import scrapy
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
-import json
-from functools import partial
+from scrapers.models.dog import Dog
 
 
 class AdoptAPetSpider(CrawlSpider):
     name = "adopt_a_pet"
     allowed_domains = ["adoptapet.com"]
 
-    def __init__(self, zip_code, results, *args, **kw):
+    def __init__(self, zip_code, *args, **kw):
         super(AdoptAPetSpider, self).__init__(*args, **kw)
         self.start_urls = ["http://www.adoptapet.com/dog-adoption/search/75/miles/{}?sex=f&age=puppy".format(zip_code)]
-        self.results = results
+        # self.results_queue = results_queue
 
     rules = (
-        # Extract links matching 'category.php' (but not matching 'subsection.php')
-        # and follow links from them (since no callback means follow=True by default).
-        Rule(LinkExtractor(allow=('category\.php', ), deny=('subsection\.php', ))),
-
-        # Extract links matching 'item.php' and parse them with the spider's method parse_item
-        Rule(LinkExtractor(allow=('pet\/\d+.*', )), callback='parse_ajax'),
+        Rule(LinkExtractor(allow=('pet/\d+.*', )), callback='parse_item', follow=True),
     )
 
-    def parse_ajax(self, response):
-        pet_id = response.url.split('/')[-2]
-        scrapy.Request('https://www.petfinder.com/v1/pets/{}.json?api_key=98719f8ded45b41f3153f5736d55d162'.format(pet_id),
-                       callback=partial(self.parse_item, original_response=response))
-        pass
+    def parse_item(self, response):
+        item = Dog()
+        item['url'] = [response.url]
+        self.log("####{}".format(response.url))
+        self.log("@@@@{}".format(self.start_urls[0]))
+        if response.url == self.start_urls[0]:
+            self.log("!!!!skip!")
+            return
 
-
-    def parse_item(self, response, original_response):
-        item = scrapy.Item()
-        item['url'] = [original_response.url]
-        data = json.loads(response.body)
-
-        data['results'][0]['name']
-
-        name = data['results'][0]['name']
+        name = response.xpath('//h1[@class="museo500"]/text()').extract()[0].split(" ")[-1].replace('!', '')
         item['name'] = name
 
-        breed = data['results'][0]['primary_breed']
+        breed = response.xpath('//div[@class="blue_highlight no_margin top_margin_xlarge"]/ul/li[1]/text()').extract()[0]
         item['breed'] = breed
 
-        age = data['results'][0]['age']
+        age = response.xpath('//div[@class="blue_highlight no_margin top_margin_xlarge"]/ul/li[3]/text()').extract()[0]
         item['age'] = age
 
-        size = data['results'][0]['size']
+        size = response.xpath('//div[@class="blue_highlight no_margin top_margin_xlarge"]/ul/li[4]/text()').extract()[0]
         item['size'] = size
 
-        desc = data['results'][0]['description']
-        item['desc'] = desc
+        try:
+            desc = response.xpath('//div[@class="info_box row"]/div[1]/p[1]/text()').extract()[0]
+            item['desc'] = desc
+        except:
+            try:
+                desc = response.xpath('//div[@class="info_box row"]//div[@class="body"]/text()').extract()[0]
+                item['desc'] = desc
+            except:
+                item['desc'] = ''
 
-        img = "https://drpem3xzef3kf.cloudfront.net{}".format(data['results'][0]['pet_photo'][0])
+        img = response.xpath('//div[@class="large_image"]/img[1]/@src').extract()[0]
         item['img'] = img
 
-        agency = data['results'][0]['shelter_name']
+        agency = response.xpath('//span[@class="hdr-14px-bold"]/text()').extract()[0]
         item['agency'] = agency
 
-        self.results.add(item)
+        yield item
