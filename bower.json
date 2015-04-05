@@ -1,0 +1,21 @@
+{
+  "name": "PyDog",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jamestenglish/PyDog",
+  "authors": [
+    "James English <james.t.english@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.4",
+    "react": "~0.13.1",
+    "reflux": "~0.2.7"
+  }
+}
