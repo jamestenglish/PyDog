@@ -14,9 +14,10 @@ var Job = React.createClass({
         }
         return (
             <div className="job">
-                <button className="btn btn-success navbar-btn" onClick={this.handleClick}>Reload List</button>
                 {error}
                 {status}
+                <button className="btn btn-success navbar-btn" onClick={this.handleClick}>Reload List</button>
+
             </div>
             );
     }

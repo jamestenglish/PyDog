@@ -54,14 +54,23 @@ var DogLinks = React.createClass({
 });
 
 var Dog = React.createClass({
+
+
+
     render: function () {
+        var new_dog = (<span />);
+
+        if(this.props.data.new_dog) {
+            new_dog = <small className="text-success"><span className="glyphicon glyphicon-star"/> NEW!</small>
+        }
+
         return (
             <div className="dog col-md-4">
                 <div className="thumbnail">
                     <img className="img-thumbnail" src={this.props.data.img} />
                     <div className="caption">
                         <h3 className="dogName">
-                            {this.props.data.name}
+                            {this.props.data.name} {new_dog}
                         </h3>
                         <p>{this.props.data.breed} | {this.props.data.age}</p>
                         <p>{this.props.data.size}</p>

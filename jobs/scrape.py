@@ -22,7 +22,13 @@ def remove_ids(ids_to_remove):
 
 def add_items(items_to_add):
     for item in items_to_add:
-        db.dogs.insert(dict(item))
+        item_dict = dict(item)
+        item_dict['new_dog'] = True
+        db.dogs.insert(item_dict)
+
+
+def set_db_to_old():
+    db.dogs.update({}, {'$set': {'new_dog': False}}, multi=True)
 
 
 @job(queue=q)
@@ -39,6 +45,9 @@ def scrape(job_id):
         print("Adding {}".format(len(items_to_add)))
 
         remove_ids(ids_to_remove)
+
+        set_db_to_old()
+
         add_items(items_to_add)
         print("Done")
 
