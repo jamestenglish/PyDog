@@ -3,13 +3,13 @@ from db import db
 from uuid import uuid4, UUID
 from jobs.scrape import scrape
 from datetime import datetime
-from pymongo import ASCENDING
+from pymongo import ASCENDING, DESCENDING
 
 
 class DogScrape(restful.Resource):
     def post(self):
 
-        jobs_cursor = db.jobs.find({}).sort('date', ASCENDING)
+        jobs_cursor = db.jobs.find({}).sort('date', DESCENDING)
 
         if jobs_cursor.count() > 0:
             latest_job = jobs_cursor[0]
@@ -17,7 +17,7 @@ class DogScrape(restful.Resource):
 
             minutes = delta.seconds // 60 % 60
             if minutes < 30 and len(latest_job['error']) == 0:
-                return {'error': 'Please wait {} minutes'.format(30 - minutes)}
+                return {'error': 'Please wait {} minutes. Last Run: {}'.format(30 - minutes, latest_job['date'])}
 
         job_id = uuid4()
         job = {'type': 'DogScrape',
