@@ -14,6 +14,9 @@ var JobStore = Reflux.createStore({
             dataType: 'json',
             success: function (result) {
                 this.updateData(result);
+                if(result.hasOwnProperty('error') && result['error'].length > 0) {
+                    return;
+                }
                 if(!result['done']) {
                     setTimeout(function() {
                         JobActions.load(id);
