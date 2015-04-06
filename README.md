@@ -13,6 +13,11 @@ Redis
 
 ## Running
 start mongod
+
 start redis
+
 start rqworker
+
 start flask
+
+
