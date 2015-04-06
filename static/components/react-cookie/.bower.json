@@ -1,0 +1,32 @@
+{
+  "name": "react-cookie",
+  "main": "dist/react-cookie.js",
+  "version": "0.1.7",
+  "homepage": "https://github.com/eXon/react-cookie",
+  "authors": [
+    "Benoit Tremblay <trembl.ben@gmail.com>"
+  ],
+  "description": "Load and save cookies within your React application",
+  "keywords": [
+    "cookie",
+    "cookies",
+    "react",
+    "reactjs",
+    "jsx"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules"
+  ],
+  "license": "MIT",
+  "_release": "0.1.7",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.7",
+    "commit": "6f43554b2bcf2e877134d7788d316f6228919ce7"
+  },
+  "_source": "git://github.com/eXon/react-cookie.git",
+  "_target": "~0.1.7",
+  "_originalSource": "react-cookie",
+  "_direct": true
+}

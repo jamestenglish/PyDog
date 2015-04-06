@@ -7,11 +7,12 @@ var DogStore = Reflux.createStore({
     },
     getInitialState: function () {
         this.list = [];
-        this.filter = '';
+        this.filter = reactCookie.load('filter') || '';
         return this.list;
     },
     filterData: function(filter) {
         this.filter = filter;
+        reactCookie.save('filter', filter);
         this.trigger(this._filterData(this.list));
     },
     _filterData: function(list) {
