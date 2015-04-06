@@ -2,8 +2,8 @@ from flask.ext import restful
 from db import db
 from uuid import uuid4, UUID
 from jobs.scrape import scrape
-from datetime import datetime
-from pymongo import ASCENDING, DESCENDING
+from datetime import datetime, timedelta
+from pymongo import DESCENDING
 
 
 class DogScrape(restful.Resource):
@@ -17,9 +17,9 @@ class DogScrape(restful.Resource):
             now = datetime.now()
             delta = now - latest_date
 
-            minutes = (delta.seconds % 3600) // 60
-            if minutes < 30 and len(latest_job['error']) == 0:
-                return {'error': 'Please wait {} minutes. Last Run: {}'.format(30 - minutes, latest_date)}
+            thirty_delta = timedelta(minutes=30)
+            if thirty_delta < delta and len(latest_job['error']) == 0:
+                return {'error': 'Please wait '}
 
         job_id = uuid4()
         job = {'type': 'DogScrape',
