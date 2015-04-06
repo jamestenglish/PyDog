@@ -1,6 +1,6 @@
 import scrapy
 
-from jobs.scrape import collapse_duplicates, create_duplicates_hash, get_ids_to_remove, get_items_to_add
+from job_runner.scrape import collapse_duplicates, create_duplicates_hash, get_ids_to_remove, get_items_to_add
 from nose.tools import eq_
 
 from scrapers.models.dog import Dog

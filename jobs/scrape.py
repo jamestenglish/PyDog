@@ -31,7 +31,7 @@ def scrape(job_id):
         zip_code = settings.ZIP_CODE
         scrape_results = _scrape(zip_code)
         scrape_results = collapse_duplicates(scrape_results)
-        db_dogs = list(db.dogs.find_all({}))
+        db_dogs = list(db.dogs.find({}))
 
         ids_to_remove = get_ids_to_remove(scrape_results, db_dogs)
         items_to_add = get_items_to_add(scrape_results, db_dogs)
@@ -41,16 +41,17 @@ def scrape(job_id):
 
         update = {'$set': {'done': True,
                            'percent': 100}}
-        db.find_one_and_update({'job_id', job_id}, update)
+        db.jobs.update({'job_id': job_id}, update)
 
     except:  # if ANYTHING goes wrong with the job we want to update the job db
         error_str = sys.exc_info()[0]
+        pprint(sys.exc_info())
         update = {'$set': {
             'done': True,
             'percent': 100,
             'error': error_str
         }}
-        db.find_one_and_update({'job_id', job_id}, update)
+        db.jobs.update({'job_id': job_id}, update)
 
 
 class UrlCrawlerScript(Process):
@@ -157,7 +158,7 @@ def collapse_duplicates(results):
 def create_duplicates_hash(results):
     duplicates_hash = {}
     for item in results:
-        key = "{}|{}".format(item['name'], item['agency'])
+        key = "{}|{}".format(item['name'], item['agency'][:15])
         if key not in duplicates_hash:
             duplicates_hash[key] = []
 

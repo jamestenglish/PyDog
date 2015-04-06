@@ -5,12 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Bootstrap 101 Template</title>
+    <title>PyDog</title>
 
     <!-- Bootstrap -->
-    <link href="{{ url_for('static', 'components/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='components/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
       <!-- Bootstrap theme -->
-    <link href="{{ url_for('static', 'components/bootstrap/dist/css/bootstrap-theme.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='components/bootstrap/dist/css/bootstrap-theme.min.css') }}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -19,8 +21,8 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <script src="{{ url_for('static', 'components/react/react.js') }}"></script>
-    <script src="{{ url_for('static', 'components/react/JSXTransformer.js') }}"></script>
+    <script src="{{ url_for('static', filename='components/react/react.js') }}"></script>
+    <script src="{{ url_for('static', filename='components/react/JSXTransformer.js') }}"></script>
   </head>
   <body>
     <div id="Main">&nbsp</div>
@@ -28,6 +30,22 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{{ url_for('static', 'components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='components/reflux/dist/reflux.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='components/classnames/index.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/actions/common_actions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/actions/dog_actions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/actions/job_actions.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/stores/dog_store.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/stores/job_store.js') }}"></script>
+
+    <script type="text/jsx" src="{{ url_for('static', filename='js/components/filter.jsx') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/components/job.jsx') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/components/dog.jsx') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/components/dog_list.jsx') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/components/page.jsx') }}"></script>
   </body>
 </html>

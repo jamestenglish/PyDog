@@ -60,7 +60,7 @@ class PetFinderApi():
     def _parse_dog(data):
         item = Dog()
 
-        item['url'] = "https://www.petfinder.com/petdetail/{}/".format(data['id'])
+        item['url'] = ["https://www.petfinder.com/petdetail/{}/".format(data['id'])]
 
         name = data['name']
         item['name'] = name
