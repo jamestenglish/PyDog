@@ -18,7 +18,7 @@ class DogScrape(restful.Resource):
             delta = now - latest_date
 
             thirty_delta = timedelta(minutes=30)
-            if thirty_delta < delta and len(latest_job['error']) == 0:
+            if thirty_delta > delta and len(latest_job['error']) == 0:
                 return {'error': 'Please wait {} '.format(delta-thirty_delta)}
 
         job_id = uuid4()
