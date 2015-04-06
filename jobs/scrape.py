@@ -34,10 +34,13 @@ def scrape(job_id):
         db_dogs = list(db.dogs.find({}))
 
         ids_to_remove = get_ids_to_remove(scrape_results, db_dogs)
+        print("Removing {}".format(len(ids_to_remove)))
         items_to_add = get_items_to_add(scrape_results, db_dogs)
+        print("Adding {}".format(len(items_to_add)))
 
         remove_ids(ids_to_remove)
         add_items(items_to_add)
+        print("Done")
 
         update = {'$set': {'done': True,
                            'percent': 100}}
@@ -70,8 +73,6 @@ class UrlCrawlerScript(Process):
             self.spider = spider
 
         def _item(self, item, response, spider):
-            print("ITEM!!")
-            pprint(item)
             self.result_queue.put(item)
 
         def run(self):
@@ -81,8 +82,13 @@ class UrlCrawlerScript(Process):
 
 
 def _scrape(zip_code):
+    print("Running Adopt A Pet")
     results = _scrape_spider(AdoptAPetSpider(zip_code))
+    print("Done")
+
+    print("Running Pet Finder")
     pet_finder_api = PetFinderApi(zip_code)
+    print("Done")
     results.extend(pet_finder_api.find_dog_items())
 
     return results
