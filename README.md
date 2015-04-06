@@ -11,6 +11,11 @@ MongoDB
 
 Redis
 
+## Installation
+pip install -r requirements.txt
+
+bower install
+
 ## Running
 start mongod
 
