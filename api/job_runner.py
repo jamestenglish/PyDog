@@ -19,7 +19,7 @@ class DogScrape(restful.Resource):
 
             minutes = (delta.seconds % 3600) // 60
             if minutes < 30 and len(latest_job['error']) == 0:
-                return {'error': 'Please wait {} minutes. Last Run: {}'.format(30 - minutes, latest_date['date'])}
+                return {'error': 'Please wait {} minutes. Last Run: {}'.format(30 - minutes, latest_date)}
 
         job_id = uuid4()
         job = {'type': 'DogScrape',
