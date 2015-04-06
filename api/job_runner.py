@@ -13,11 +13,13 @@ class DogScrape(restful.Resource):
 
         if jobs_cursor.count() > 0:
             latest_job = jobs_cursor[0]
-            delta = datetime.now() - latest_job['date']
+            latest_date = latest_job['date']
+            now = datetime.now()
+            delta = now - latest_date
 
-            minutes = delta.seconds // 60 % 60
+            minutes = (delta.seconds % 3600) // 60
             if minutes < 30 and len(latest_job['error']) == 0:
-                return {'error': 'Please wait {} minutes. Last Run: {}'.format(30 - minutes, latest_job['date'])}
+                return {'error': 'Please wait {} minutes. Last Run: {}'.format(30 - minutes, latest_date['date'])}
 
         job_id = uuid4()
         job = {'type': 'DogScrape',
