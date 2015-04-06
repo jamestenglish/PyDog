@@ -6,5 +6,13 @@ Scraps various sites and adds extra filtering to present dog adoption candidates
 
 ## Dependencies
 Python 2.7 (because of scrapy unfortunately)
+
 MongoDB
+
 Redis
+
+## Running
+start mongod
+start redis
+start rqworker
+start flask
