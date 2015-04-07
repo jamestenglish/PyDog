@@ -10,6 +10,7 @@ from scrapers.pet_finder_api import PetFinderApi
 from scrapy.utils.project import get_project_settings
 from pprint import pprint
 import settings
+from uuid import UUID
 
 from billiard import Process
 from billiard.queues import JoinableQueue
@@ -63,7 +64,7 @@ def scrape(job_id):
             'percent': 100,
             'error': error_str
         }}
-        db.jobs.update({'job_id': job_id}, update)
+        db.jobs.update({'job_id': UUID(job_id)}, update)
 
 
 class UrlCrawlerScript(Process):

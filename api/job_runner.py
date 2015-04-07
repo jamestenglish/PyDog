@@ -19,7 +19,7 @@ class DogScrape(restful.Resource):
 
             thirty_delta = timedelta(minutes=30)
             if thirty_delta > delta and len(latest_job['error']) == 0:
-                return {'error': 'Please wait {} '.format(delta-thirty_delta)}
+                return {'error': 'Please wait {} '.format(thirty_delta-delta)}
 
         job_id = uuid4()
         job = {'type': 'DogScrape',

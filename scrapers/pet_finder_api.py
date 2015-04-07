@@ -77,7 +77,9 @@ class PetFinderApi():
         desc = data['description']
         item['desc'] = desc
 
-        img = "https://drpem3xzef3kf.cloudfront.net{}".format(data['pet_photo'][0])
+        img = ''
+        if 'pet_photo' in data:
+            img = "https://drpem3xzef3kf.cloudfront.net{}".format(data['pet_photo'][0])
         item['img'] = img
 
         agency = data['shelter_name']
